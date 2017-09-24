@@ -1,0 +1,16 @@
+[
+{
+  "modid": "creation_command_line",
+  "name": "Creation Command Line",
+  "description": "Creation Command Line, select area to: Copy/Paste, Fill, Rectangle, Box, Clear..., and Undo/Redo.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://github.com/alban-auzeill/minecraft-creation-command-line-mod",
+  "updateUrl": "",
+  "authorList": ["Alban"],
+  "credits": "The Forge and FML guys.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
