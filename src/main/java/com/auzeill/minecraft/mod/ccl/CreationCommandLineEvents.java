@@ -41,6 +41,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -139,6 +140,12 @@ class CreationCommandLineEvents {
         event.getPlayer().sendMessage(new TextComponentString(TextFormatting.GREEN + "ERROR, Unknown command: " + message));
       }
     }
+  }
+
+  @SubscribeEvent
+  public void startServer(WorldEvent.Load worldEvent) {
+    Server instance = Server.getInstance();
+    System.out.println("Server loaded");
   }
 
 }

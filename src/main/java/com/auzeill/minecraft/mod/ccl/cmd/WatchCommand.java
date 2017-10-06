@@ -1,5 +1,6 @@
 package com.auzeill.minecraft.mod.ccl.cmd;
 
+import com.auzeill.minecraft.mod.ccl.Server;
 import com.auzeill.minecraft.mod.ccl.world.BlockChangeList;
 import com.auzeill.minecraft.mod.ccl.world.CopiedArea;
 import com.auzeill.minecraft.mod.ccl.world.Serializer;
@@ -41,6 +42,12 @@ public class WatchCommand extends ChatCommand {
       return;
     }
     BlockPos pos = pos();
+    if (fileName.equals("server")) {
+      Context context = new Context(pos, player().getPosition(), null, world(), player());
+      tasks.add(TickTask.create(500, context::updateFromServer));
+      print("Will automatically load using server");
+      return;
+    }
     if (fileName != null && pos != null) {
       Path filePath = SaveCommand.getSaveDir().resolve(fileName + SaveCommand.AREA_EXTENSION);
       if (Files.exists(filePath)) {
@@ -84,6 +91,16 @@ public class WatchCommand extends ChatCommand {
         }
       } catch (IOException | RuntimeException e) {
         print(e.getClass().getSimpleName() + ": " + e.getMessage());
+      }
+      return true;
+    }
+
+    public boolean updateFromServer() {
+      Server server = Server.getInstance();
+      CopiedArea area = server.queue.poll();
+      if (area != null) {
+        BlockChangeList change = new BlockChangeList(world);
+        PasteCommand.pasteCopiedArea(selectedPos, playerPos, area, change, true);
       }
       return true;
     }

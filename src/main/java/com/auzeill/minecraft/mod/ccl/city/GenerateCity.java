@@ -1,5 +1,6 @@
 package com.auzeill.minecraft.mod.ccl.city;
 
+import com.auzeill.minecraft.mod.ccl.Server;
 import com.auzeill.minecraft.mod.ccl.world.Area;
 import com.auzeill.minecraft.mod.ccl.world.CopiedArea;
 import com.auzeill.minecraft.mod.ccl.world.Serializer;
@@ -53,6 +54,7 @@ public class GenerateCity {
     CopiedArea out = new CopiedArea(new Area().addToMax(width - 1, 20, width - 1));
     drawParcelling(out, fractalLevel, new BlockPos(0, 0, 0), EnumFacing.EAST);
     saveToFile(out);
+    Server.submit(out);
   }
 
   static int roadWidth(int level) {
