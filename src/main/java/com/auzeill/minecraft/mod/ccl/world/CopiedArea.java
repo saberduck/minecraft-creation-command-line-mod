@@ -26,17 +26,39 @@ public class CopiedArea {
     }
   }
 
-  private CopiedArea(Area area, List<IBlockState> states) {
+  public CopiedArea(Area area, List<IBlockState> states) {
     this.area = area;
     this.states = states;
   }
 
-  public void paste(BlockChangeList change, BlockPos pos) {
-    partialPaste(change, pos, true);
-    partialPaste(change, pos, false);
+  public CopiedArea(Area area) {
+    this.area = area;
+    this.states = new ArrayList<>();
+    int size = area.lengthX() * area.lengthY() * area.lengthZ();
+    for (int i = 0; i < size; i++) {
+      states.add(Blocks.AIR.getDefaultState());
+    }
   }
 
-  public void partialPaste(BlockChangeList change, BlockPos pos, boolean topSolid) {
+  public void set(BlockPos pos, IBlockState state) {
+    if (pos.getX() < area.min.getX() || pos.getX() > area.max.getX() ||
+      pos.getY() < area.min.getY() || pos.getY() > area.max.getY() ||
+      pos.getZ() < area.min.getZ() || pos.getZ() > area.max.getZ()) {
+      throw new IndexOutOfBoundsException(pos.toString() + " is not part of " + area.toString());
+    }
+    int dx = pos.getX() - area.min.getX();
+    int dy = pos.getY() - area.min.getY();
+    int dz = pos.getZ() - area.min.getZ();
+    int index = (dx * area.lengthZ() + dz) * area.lengthY() + dy;
+    states.set(index, state);
+  }
+
+  public void paste(BlockChangeList change, BlockPos pos, boolean forceAir) {
+    partialPaste(change, pos, true, forceAir);
+    partialPaste(change, pos, false, forceAir);
+  }
+
+  public void partialPaste(BlockChangeList change, BlockPos pos, boolean topSolid, boolean forceAir) {
     int dx = pos.getX() - area.min.getX();
     int dy = pos.getY() - area.min.getY();
     int dz = pos.getZ() - area.min.getZ();
@@ -45,7 +67,7 @@ public class CopiedArea {
       for (int z = area.min.getZ(); z <= area.max.getZ(); z++) {
         for (int y = area.min.getY(); y <= area.max.getY(); y++) {
           IBlockState state = states.get(i);
-          if (!state.getBlock().equals(Blocks.AIR) && topSolid == state.getBlock().isTopSolid(state)) {
+          if ((forceAir || !state.getBlock().equals(Blocks.AIR)) && topSolid == state.getBlock().isTopSolid(state)) {
             change.setState(new BlockPos(x + dx, y + dy, z + dz), state);
           }
           i++;

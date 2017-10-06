@@ -1,6 +1,7 @@
 package com.auzeill.minecraft.mod.ccl;
 
 import com.auzeill.minecraft.mod.ccl.cmd.AddTorchCommand;
+import com.auzeill.minecraft.mod.ccl.cmd.WatchCommand;
 import com.auzeill.minecraft.mod.ccl.cmd.BoxCommand;
 import com.auzeill.minecraft.mod.ccl.cmd.ChatCommand;
 import com.auzeill.minecraft.mod.ccl.cmd.ClearCommand;
@@ -28,6 +29,7 @@ import com.auzeill.minecraft.mod.ccl.cmd.WallCommand;
 import com.auzeill.minecraft.mod.ccl.world.BlockChange;
 import com.auzeill.minecraft.mod.ccl.world.BlockChangeList;
 import com.auzeill.minecraft.mod.ccl.world.PlayerHistory;
+import com.auzeill.minecraft.mod.ccl.world.TickTask;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.block.state.IBlockState;
@@ -40,6 +42,7 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 class CreationCommandLineEvents {
 
@@ -48,6 +51,7 @@ class CreationCommandLineEvents {
   private final List<ChatCommand> commands = Arrays.asList(
     new AddTorchCommand(),
     new BoxCommand(),
+    new WatchCommand(),
     new ClearCommand(),
     new CopyCommand(),
     new DayCommand(),
@@ -94,13 +98,21 @@ class CreationCommandLineEvents {
     }
     BlockChangeList change = new BlockChangeList(event.getWorld());
     if (event instanceof BlockEvent.MultiPlaceEvent) {
-      for (BlockSnapshot snapshot : ((BlockEvent.MultiPlaceEvent)event).getReplacedBlockSnapshots()) {
+      for (BlockSnapshot snapshot : ((BlockEvent.MultiPlaceEvent) event).getReplacedBlockSnapshots()) {
         addSnapshot(change, snapshot);
       }
     } else {
       addSnapshot(change, event.getBlockSnapshot());
     }
     history.addChange(change);
+  }
+
+  @SubscribeEvent
+  public void tickEvent(TickEvent.ServerTickEvent event) {
+    if (event.phase == TickEvent.Phase.END) {
+      return;
+    }
+    TickTask.tickAll();
   }
 
   private static void addSnapshot(BlockChangeList change, BlockSnapshot snapshot) {

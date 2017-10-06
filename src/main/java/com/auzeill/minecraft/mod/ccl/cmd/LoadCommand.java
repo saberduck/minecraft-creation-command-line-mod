@@ -28,7 +28,7 @@ public class LoadCommand extends ChatCommand {
       if (Files.exists(filePath)) {
         try {
           CopiedArea copiedArea = Serializer.deserializeCopiedArea(filePath);
-          PasteCommand.pasteCopiedArea(pos, player().getPosition(), copiedArea, addBlockChange());
+          PasteCommand.pasteCopiedArea(pos, player().getPosition(), copiedArea, addBlockChange(), false);
           history().copiedArea = copiedArea;
           print("Loaded \"" + filePath + "\" " + copiedArea.area.size() + " blocks.");
         } catch (IOException | RuntimeException e) {

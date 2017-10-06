@@ -21,12 +21,12 @@ public class PasteCommand extends ChatCommand {
     BlockPos pos = pos();
     CopiedArea copiedArea = history().copiedArea;
     if (copiedArea != null && pos != null) {
-      pasteCopiedArea(pos, player().getPosition(), copiedArea, addBlockChange());
+      pasteCopiedArea(pos, player().getPosition(), copiedArea, addBlockChange(), false);
       print("Paste " + copiedArea.area.size() + " blocks.");
     }
   }
 
-  public static void pasteCopiedArea(BlockPos pos, BlockPos playerPos, CopiedArea copiedArea, BlockChangeList change) {
+  public static void pasteCopiedArea(BlockPos pos, BlockPos playerPos, CopiedArea copiedArea, BlockChangeList change, boolean forceAir) {
     BlockPos relativePos = pos.subtract(playerPos);
     BlockPos destinationPos = pos;
     if (relativePos.getX() < 0) {
@@ -38,7 +38,7 @@ public class PasteCommand extends ChatCommand {
     if (relativePos.getZ() < 0) {
       destinationPos = destinationPos.add(0, 0, 1 - copiedArea.area.lengthZ());
     }
-    copiedArea.paste(change, destinationPos);
+    copiedArea.paste(change, destinationPos, forceAir);
   }
 
 }
