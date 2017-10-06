@@ -18,6 +18,10 @@ public class Pos {
     return new Pos(x + dx, y + dy, z + dz);
   }
 
+  public Pos add(Pos other) {
+    return new Pos(x + other.x, y + other.y, z + other.z);
+  }
+
   @Override
   public String toString() {
     return "(x: " + x + ", y: " + y + ", z: " + z + ")";

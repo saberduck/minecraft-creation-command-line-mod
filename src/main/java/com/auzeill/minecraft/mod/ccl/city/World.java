@@ -42,7 +42,7 @@ public class World {
     blocks[x][y][z] = value;
   }
 
-  public void save(String filePath) throws IOException {
+  public void save(Pos base, String filePath) throws IOException {
     Path path = Paths.get(filePath);
     MinMaxPos limit = new MinMaxPos();
     for (int x = 0; x < xWidth; x++) {
@@ -65,7 +65,7 @@ public class World {
       }
       Pos size = limit.size();
       try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(path, UTF_8)) {
-        GSON.toJson(new SavedWorld(new Area(Pos.ZERO, size.add(-1, -1, -1)), states), writer);
+        GSON.toJson(new SavedWorld(new Area(base, size.add(base).add(-1, -1, -1)), states), writer);
       }
       System.out.println(path.getFileName() + " saved. Size: " + size);
     } else {

@@ -12,7 +12,7 @@ public class UseBlock {
     world.set(3, 0, 0, Block.DiamondBlock);
     world.set(4, 0, 0, Block.Concrete.White);
 
-    world.save("run/saved-areas/city.area.json");
+    world.save(new Pos(0, 4, 0), "run/saved-areas/city.area.json");
   }
 
 }
