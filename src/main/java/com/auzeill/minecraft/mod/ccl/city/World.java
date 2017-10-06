@@ -1,14 +1,19 @@
 package com.auzeill.minecraft.mod.ccl.city;
 
-import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class World {
+
+  public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   private final int xWidth;
   private final int yHeight;
@@ -39,51 +44,30 @@ public class World {
 
   public void save(String filePath) throws IOException {
     Path path = Paths.get(filePath);
-    MinMax xLimit = new MinMax();
-    MinMax yLimit = new MinMax();
-    MinMax zLimit = new MinMax();
+    MinMaxPos limit = new MinMaxPos();
     for (int x = 0; x < xWidth; x++) {
       for (int y = 0; y < yHeight; y++) {
         for (int z = 0; z < zDepth; z++) {
           if (!Block.Air.equals(blocks[x][y][z])) {
-            xLimit.update(x);
-            yLimit.update(y);
-            zLimit.update(z);
+            limit = limit.update(new Pos(x, y, z));
           }
         }
       }
     }
-    if (!xLimit.isEmpty()) {
-      try (BufferedWriter code = Files.newWriter(path.toFile(), UTF_8)) {
-        code.append("{\n");
-        code.append("  \"area\": {\n");
-        code.append("    \"min\": {\"x\": 0,\"y\": 0,\"z\": 0},\n");
-        code.append("    \"max\": {");
-        code.append("\"x\": ").append(Integer.toString(xLimit.size() - 1)).append(",");
-        code.append("\"y\": ").append(Integer.toString(yLimit.size() - 1)).append(",");
-        code.append("\"z\": ").append(Integer.toString(zLimit.size() - 1)).append("}\n");
-        code.append("  },\n");
-        code.append("  \"states\": [\n");
-        code.append("    ");
-        boolean firstElement = true;
-        for (int x = xLimit.min(); x <= xLimit.max(); x++) {
-          for (int z = zLimit.min(); z <= zLimit.max(); z++) {
-            for (int y = yLimit.min(); y <= yLimit.max(); y++) {
-              if (firstElement) {
-                firstElement = false;
-              } else {
-                code.append(",\n    ");
-              }
-              code.append("\"").append(blocks[x][y][z]).append("\"");
-            }
+    if (!limit.isEmpty()) {
+      List<String> states = new ArrayList<>();
+      for (int x = limit.min.x; x <= limit.max.x; x++) {
+        for (int z = limit.min.z; z <= limit.max.z; z++) {
+          for (int y = limit.min.y; y <= limit.max.y; y++) {
+            states.add(blocks[x][y][z]);
           }
         }
-        code.append("\n");
-        code.append("  ]\n");
-        code.append("}\n");
       }
-      System.out.println("(x: " + xLimit.size() + ", y: " + yLimit.size() + ", z: " + zLimit.size() + ")");
-      System.out.println(path.getFileName() + " saved.");
+      Pos size = limit.size();
+      try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(path, UTF_8)) {
+        GSON.toJson(new SavedWorld(new Area(Pos.ZERO, size.add(-1, -1, -1)), states), writer);
+      }
+      System.out.println(path.getFileName() + " saved. Size: " + size);
     } else {
       System.out.println("Error, empty world.");
     }
@@ -120,6 +104,27 @@ public class World {
 
     public int size() {
       return max - min + 1;
+    }
+  }
+
+  private static class Area {
+    public final Pos min;
+    public final Pos max;
+
+    public Area(Pos min, Pos max) {
+      this.min = min;
+      this.max = max;
+    }
+  }
+
+  private static class SavedWorld {
+
+    public final Area area;
+    public final List<String> states;
+
+    public SavedWorld(Area area, List<String> states) {
+      this.area = area;
+      this.states = states;
     }
   }
 
