@@ -46,14 +46,7 @@ public final class Serializer {
   public static class IBlockStateAdapter implements JsonSerializer<IBlockState>, JsonDeserializer<IBlockState> {
     @Override
     public JsonElement serialize(IBlockState src, Type typeOfSrc, JsonSerializationContext context) {
-      ResourceLocation nameForObject = Block.REGISTRY.getNameForObject(src.getBlock());
-      String domain = nameForObject.getResourceDomain();
-      if (domain.equals("minecraft")) {
-        domain = "";
-      }
-      int meta = src.getBlock().getMetaFromState(src);
-      String blockState = domain + ":" + nameForObject.getResourcePath() + ":" + meta;
-      return new JsonPrimitive(blockState);
+      return new JsonPrimitive(blockStateToString(src));
     }
 
     @Override
@@ -69,6 +62,19 @@ public final class Serializer {
       int meta = Integer.parseInt(blockState[2]);
       return block.getStateFromMeta(meta);
     }
+  }
+
+  public static String blockStateToString(IBlockState state) {
+    ResourceLocation registryName = state.getBlock().getRegistryName();
+    if (registryName == null) {
+      throw new IllegalStateException();
+    }
+    String domain = registryName.getResourceDomain();
+    if (domain.equals("minecraft")) {
+      domain = "";
+    }
+    int meta = state.getBlock().getMetaFromState(state);
+    return domain + ":" + registryName.getResourcePath() + ":" + meta;
   }
 
 }
